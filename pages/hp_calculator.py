@@ -34,6 +34,25 @@ def roll_hp(hds : dict, first_level_hd = None):
     
     return ttl_from_rolls 
 
+def quick_calc(hds, bonuses, first_level_hd = None):
+    mean_hp = 0
+    max_hp = 0
+
+    for n, nb_dice in hds.items():
+        mean_rolls = [n/2 for _ in range(nb_dice)]
+        max_rolls = [n for _ in range(nb_dice)]
+        if first_level_hd is not None and len(mean_rolls) > 0 and n == first_level_hd:
+            mean_rolls[0] = n
+        mean_hp += np.sum(mean_rolls)
+        max_hp += np.sum(max_rolls)
+
+    ttl_from_con = sum(hds.values()) * bonuses['con']
+    ttl_from_other = sum(hds.values()) * bonuses['other']
+    print(ttl_from_con, ttl_from_other)
+    mean_hp += ttl_from_con + ttl_from_other
+    max_hp += ttl_from_con + ttl_from_other
+
+    return mean_hp, max_hp
 
 def rework_y_axis(ax, n_samples):
     ticks = []
@@ -50,8 +69,8 @@ def rework_y_axis(ax, n_samples):
 def bootstrap_hp(hds, bonuses, first_level_hd, n_samples = 10_000):
     ttl_from_rolls, ttl_with_bonus = [], []
 
-    ttl_from_con = sum(hds.values()) + bonuses['con']
-    ttl_from_other = sum(hds.values()) + bonuses['other']
+    ttl_from_con = sum(hds.values()) * bonuses['con']
+    ttl_from_other = sum(hds.values()) * bonuses['other']
 
     for i in range(n_samples):
         from_rolls = roll_hp(hds, first_level_hd)
@@ -62,12 +81,9 @@ def bootstrap_hp(hds, bonuses, first_level_hd, n_samples = 10_000):
     ax.hist(ttl_with_bonus)
     ax = rework_y_axis(ax, n_samples)
     st.pyplot(fig)    
+    return ttl_with_bonus
 
-    st.write(f'mean: {np.mean(ttl_with_bonus)}, median: {np.median(ttl_with_bonus)}')
-    perc_10 = sorted(ttl_with_bonus)[int(n_samples * .1)]
-    perc_90 = sorted(ttl_with_bonus)[int(n_samples * .9)]
-    st.write(f'10th percentile: {perc_10}, 90th: {perc_90}')
-
+    
 st.title('HP Calculator')
 hd_cols = st.columns(4)
 
@@ -100,9 +116,29 @@ with bonus_cols[1] as col:
     bonuses['other'] = st.number_input(f'any other bonus (e.g., feats)', value = 0, min_value = -5, max_value = 5, key = 'other')
 
 st.write(f'Total bonus per level: {sum(bonuses.values())}')
+mean_hp, max_hp = quick_calc(hds, bonuses, first_level_hd)
+mean_hp = round(mean_hp, 3)
+max_hp = int(max_hp)
+st.write(f'expected HP: {mean_hp}, max HP: {max_hp}')
 
+
+st.write('Query: what is the probability of the below total HP.')
+hp_query = st.number_input('Probability of HP:', value = int(mean_hp), min_value = 0, max_value = 2 * max_hp)
+    
+if st.button('Roll!'):
+    ttl_with_bonus = bootstrap_hp(hds, bonuses, first_level_hd)
+    
+    sorted_ttls = sorted(ttl_with_bonus)
+    ttl_median = round(np.median(ttl_with_bonus), 3)
+    ttl_mean = round(np.median(ttl_with_bonus), 3)
+    perc_10 = sorted_ttls[int(len(ttl_with_bonus) * .1)]
+    perc_90 = sorted_ttls[int(len(ttl_with_bonus) * .9)]
+    st.write(f'mean: {ttl_mean}, median: {ttl_median}')
+    st.write(f'10th percentile: {perc_10}, 90th: {perc_90}')
+    
+    nb_less = len([x for x in sorted_ttls if x < hp_query])
+    nb_more = len([x for x in sorted_ttls if x >= hp_query])
+    st.write(f'{100 * round(nb_less / len(ttl_with_bonus), 3)}% samples with fewer than {hp_query} HP, {100 * round(nb_more / len(ttl_with_bonus), 3)}% samples with greater or equal to {hp_query} HP')
 
 st.button("Reset", type="primary")
-if st.button('Roll!'):
-    bootstrap_hp(hds, bonuses, first_level_hd)
 
