@@ -80,7 +80,9 @@ def bootstrap_hp(hds, bonuses, first_level_hd, n_samples = 10_000):
     fig, ax = plt.subplots()
     ax.hist(ttl_with_bonus)
     ax = rework_y_axis(ax, n_samples)
-    st.pyplot(fig)    
+    plt.xlabel('Total HP')
+    plt.xlabel('Probability of Total HP')
+    st.pyplot(fig)
     return ttl_with_bonus
 
     
@@ -123,7 +125,7 @@ st.write(f'expected HP: {mean_hp}, max HP: {max_hp}')
 
 
 st.write('Query: what is the probability of the below total HP.')
-hp_query = st.number_input('Probability of HP:', value = int(mean_hp), min_value = 0, max_value = 2 * max_hp)
+hp_query = st.number_input('How often will total be less/greater than:', value = int(mean_hp), min_value = 0, max_value = 2 * max_hp)
     
 if st.button('Roll!'):
     ttl_with_bonus = bootstrap_hp(hds, bonuses, first_level_hd)
