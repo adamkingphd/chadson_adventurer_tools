@@ -70,14 +70,12 @@ def bootstrap_hp(hds, bonuses, first_level_hd, n_samples = 10_000):
 
     ttl_from_con = sum(hds.values()) * bonuses['con']
     ttl_from_other = sum(hds.values()) * bonuses['other']
-    print(ttl_from_con, ttl_from_other)
-
+    
     for i in range(n_samples):
         from_rolls = roll_hp(hds, first_level_hd)
         ttl_from_rolls.append(from_rolls)
         ttl_with_bonus.append(from_rolls + ttl_from_con + ttl_from_other)
 
-    print(np.mean(ttl_with_bonus), np.mean(ttl_from_rolls))
     fig, ax = plt.subplots()
     ax.hist(ttl_with_bonus)
     ax = rework_y_axis(ax, n_samples)
@@ -140,7 +138,7 @@ if st.button('Roll!'):
     
     nb_less = len([x for x in sorted_ttls if x < hp_query])
     nb_more = len([x for x in sorted_ttls if x >= hp_query])
-    st.write(f'{100 * round(nb_less / len(ttl_with_bonus), 3)}% samples with fewer than {hp_query} HP, {100 * round(nb_more / len(ttl_with_bonus), 3)}% samples with greater or equal to {hp_query} HP')
+    st.write(f'{round(100 * nb_less / len(ttl_with_bonus), 3)}% samples with fewer than {hp_query} HP, {round(100 * nb_more / len(ttl_with_bonus), 3)}% samples with greater or equal to {hp_query} HP')
 
 st.button("Reset", type="primary")
 
