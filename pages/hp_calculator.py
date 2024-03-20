@@ -39,7 +39,7 @@ def quick_calc(hds, bonuses, first_level_hd = None):
     max_hp = 0
 
     for n, nb_dice in hds.items():
-        mean_rolls = [n/2 for _ in range(nb_dice)]
+        mean_rolls = [((n+1)/2) for _ in range(nb_dice)]
         max_rolls = [n for _ in range(nb_dice)]
         if first_level_hd is not None and len(mean_rolls) > 0 and n == first_level_hd:
             mean_rolls[0] = n
