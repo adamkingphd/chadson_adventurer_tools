@@ -48,7 +48,6 @@ def quick_calc(hds, bonuses, first_level_hd = None):
 
     ttl_from_con = sum(hds.values()) * bonuses['con']
     ttl_from_other = sum(hds.values()) * bonuses['other']
-    print(ttl_from_con, ttl_from_other)
     mean_hp += ttl_from_con + ttl_from_other
     max_hp += ttl_from_con + ttl_from_other
 
