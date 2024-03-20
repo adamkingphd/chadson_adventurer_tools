@@ -70,12 +70,14 @@ def bootstrap_hp(hds, bonuses, first_level_hd, n_samples = 10_000):
 
     ttl_from_con = sum(hds.values()) * bonuses['con']
     ttl_from_other = sum(hds.values()) * bonuses['other']
+    print(ttl_from_con, ttl_from_other)
 
     for i in range(n_samples):
         from_rolls = roll_hp(hds, first_level_hd)
         ttl_from_rolls.append(from_rolls)
-        ttl_with_bonus.append(from_rolls + ttl_from_con + ttl_from_con)
+        ttl_with_bonus.append(from_rolls + ttl_from_con + ttl_from_other)
 
+    print(np.mean(ttl_with_bonus), np.mean(ttl_from_rolls))
     fig, ax = plt.subplots()
     ax.hist(ttl_with_bonus)
     ax = rework_y_axis(ax, n_samples)
@@ -102,7 +104,6 @@ first_level_hd = int(first_level_hd.replace('d', ''))
 
 if first_level_hd not in hds or hds[first_level_hd] == 0:
     sorted_hd = sorted(hds, key = hds.get, reverse = True)
-    print(sorted_hd)
     st.write(f'Warning! HD for first level not represented in counts above. Assuming first level is d{sorted_hd[0]} instead.')
     first_level_hd = sorted_hd[0]
 
